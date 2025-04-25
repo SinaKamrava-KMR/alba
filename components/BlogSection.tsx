@@ -35,7 +35,7 @@ export default async function BlogSection() {
               itemScope
               itemType="https://schema.org/BlogPosting"
             >
-              <Link href={`/blog/${post.id}`} className="block h-full">
+              <Link href={`/blogs/${post.id}`} className="block h-full">
                 {post.id === featured[0].id ? (
                   <div className="grid md:grid-cols-2 h-full">
                     <figure className="relative h-64 md:h-auto">
