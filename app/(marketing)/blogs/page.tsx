@@ -1,66 +1,80 @@
-// app/blog/page.tsx
-import fs from 'fs/promises'
-import path from 'path'
-import Image from 'next/image'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import Badge from '@/components/ui/badge'
-import Pagination from '@/components/ui/pagination'
+// app/(marketing)/blogs/page.tsx
+import fs from 'fs/promises';
+import path from 'path';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import Badge from '@/components/ui/badge';
+import Pagination from '@/components/ui/pagination';
 
+/* ---------- types ---------- */
 type BlogPost = {
-  id: number
-  slug: string
-  title: string
-  excerpt: string
-  image: string
-  author: { name: string; avatar?: string }
-  category: string
-  date: string
-}
+  id: number;
+  slug: string;
+  title: string;
+  excerpt: string;
+  image: string;
+  author: { name: string; avatar?: string };
+  category: string;
+  date: string;
+};
 
 type BlogData = {
-  title: string
-  subtitle: string
-  postsPerPage: number
-  posts: BlogPost[]
-}
+  title: string;
+  subtitle: string;
+  postsPerPage: number;
+  posts: BlogPost[];
+};
 
-// سرور: خواندن محتوا
+/* ---------- helpers ---------- */
 async function getBlogData(): Promise<BlogData> {
   const raw = await fs.readFile(
     path.join(process.cwd(), 'data/content.json'),
     'utf8'
-  )
-  const { blogs } = JSON.parse(raw)
-  return blogs
+  );
+  const { blogs } = JSON.parse(raw);
+  return blogs;
 }
 
-// SEO متا
+/* ---------- metadata ---------- */
 export async function generateMetadata() {
   return {
     title: 'مقالات کلینیک البا | آرشیو',
     description:
       'آرشیو کامل مقالات آموزشی کلینیک زیبایی البا درباره لیزر، بوتاکس، فیلر و مراقبت پوست.',
-  }
+  };
 }
 
-// صفحهٔ اصلی داینامیک با query string
-export default async function BlogArchive({ searchParams }: any) {
-  const blog = await getBlogData()
-  const per = blog.postsPerPage
-  const all = blog.posts
-  const totalPages = Math.ceil(all.length / per)
+/* ---------- page ---------- */
+export default async function BlogArchive({
+  searchParams,
+}: {
+  /** ⇐ در Next.js 15 یک Promise است  */
+  searchParams: Promise<{ page?: string }>;
+}) {
+  /* ابتدا searchParams را resolve می‌کنیم */
+  const { page: pageQuery } = await searchParams;
 
-  const page = Math.max(1, Number(searchParams?.page ?? 1))
+  const blog = await getBlogData();
+  const per = blog.postsPerPage;
+  const all = blog.posts;
+  const totalPages = Math.ceil(all.length / per);
 
-  if (page > totalPages && totalPages > 0) notFound()
+  /* عدد صفحه */
+  const currentPage = Math.max(1, Number(pageQuery ?? 1));
 
-  const start = (page - 1) * per
-  const posts = all.slice(start, start + per)
+  /* 404 اگر صفحه بیش از حد است */
+  if (currentPage > totalPages && totalPages > 0) notFound();
 
+  /* slice پست‌های همین صفحه */
+  const start = (currentPage - 1) * per;
+  const posts = all.slice(start, start + per);
+
+  /* ---------------- render -------------- */
   return (
     <main className="pt-28 pb-20 bg-gray-50 min-h-[calc(100vh-320px)]">
       <div className="edu-container">
+        {/* Header */}
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold mb-3">
             {blog.title}
@@ -68,6 +82,7 @@ export default async function BlogArchive({ searchParams }: any) {
           <p className="text-gray-600 max-w-2xl">{blog.subtitle}</p>
         </header>
 
+        {/* Grid of posts */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {posts.map((post) => (
             <Link
@@ -89,6 +104,7 @@ export default async function BlogArchive({ searchParams }: any) {
                 <Badge variant="outline" className="mb-3 bg-blue-400/30">
                   {post.category}
                 </Badge>
+
                 <h3 className="font-bold text-lg mb-2 line-clamp-1">
                   {post.title}
                 </h3>
@@ -103,10 +119,10 @@ export default async function BlogArchive({ searchParams }: any) {
                       alt={post.author.name}
                       width={32}
                       height={32}
-                      className="rounded-full mr-3 object-cover overflow-hidden"
+                      className="rounded-full object-cover overflow-hidden"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 mr-3 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
                       <span className="text-xs text-white">?</span>
                     </div>
                   )}
@@ -123,16 +139,15 @@ export default async function BlogArchive({ searchParams }: any) {
           ))}
         </section>
 
+        {/* Pagination */}
         {totalPages > 1 && (
           <Pagination
             totalPages={totalPages}
-            current={page}
-            hrefBuilder={(p) =>
-              p === 1 ? '/blogs' : `/blogs?page=${p}`
-            }
+            current={currentPage}
+            hrefBuilder={(p) => (p === 1 ? '/blogs' : `/blogs?page=${p}`)}
           />
         )}
       </div>
     </main>
-  )
+  );
 }

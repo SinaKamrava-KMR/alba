@@ -1,10 +1,14 @@
-import { notFound } from 'next/navigation';
+// app/(marketing)/blogs/[id]/page.tsx
 import fs from 'fs/promises';
 import path from 'path';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Badge from '@/components/ui/badge';
+import type { Metadata } from 'next';
 
+/* ------------------------------------------------------------------ */
+/* types ------------------------------------------------------------ */
 type ContentBlock =
   | { type: 'heading'; content: string }
   | { type: 'text'; content: string }
@@ -29,34 +33,54 @@ type Blogs = {
   posts: Post[];
 };
 
-type Params = {
-  params: {
-    id: string;
-  };
-};
-
+/* ------------------------------------------------------------------ */
+/* helpers ---------------------------------------------------------- */
 async function getBlogs(): Promise<Blogs> {
   const raw = await fs.readFile(
     path.join(process.cwd(), 'data/content.json'),
-    'utf8'
+    'utf8',
   );
   const { blogs } = JSON.parse(raw);
   return blogs;
 }
 
-export async function generateMetadata({ params }: Params) {
+/* ------------------------------------------------------------------ */
+/* SSG for dynamic route ------------------------------------------- */
+export async function generateStaticParams() {
   const blogs = await getBlogs();
-  const post = blogs.posts.find((p) => p.id === Number(params.id));
+  return blogs.posts.map((p) => ({ id: p.id.toString() }));
+}
+
+/* ------------------------------------------------------------------ */
+/* metadata --------------------------------------------------------- */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;             // ←  لازم است await کنیم
+  const blogs = await getBlogs();
+  const post = blogs.posts.find((p) => p.id === Number(id));
+
   if (!post) return { title: 'مقاله یافت نشد' };
+
   return {
     title: post.title,
     description: post.excerpt,
   };
 }
 
-export default async function PostPage({ params }: Params) {
+/* ------------------------------------------------------------------ */
+/* page component --------------------------------------------------- */
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;             // ←  اینجا هم await
   const blogs = await getBlogs();
-  const post = blogs.posts.find((p) => p.id === Number(params.id));
+  const post = blogs.posts.find((p) => p.id === Number(id));
+
   if (!post) notFound();
 
   const contentBlocks: ContentBlock[] = Array.isArray(post.content)
@@ -65,6 +89,7 @@ export default async function PostPage({ params }: Params) {
 
   const related = blogs.posts.filter((p) => p.id !== post.id).slice(0, 3);
 
+  /* ---------------------------- JSX ----------------------------- */
   return (
     <main className="pt-24 pb-16 bg-gray-50 min-h-[calc(100vh-200px)]">
       <div className="edu-container space-y-12">
@@ -79,14 +104,21 @@ export default async function PostPage({ params }: Params) {
             </div>
             <h1 className="text-4xl font-bold text-white">{post.title}</h1>
             <div className="flex items-center mt-4">
-              <Image src={post.author.avatar} alt={post.author.name} width={40} height={40} className="rounded-full" />
+              <Image
+                src={post.author.avatar}
+                alt={post.author.name}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
               <span className="text-white font-medium mr-3">{post.author.name}</span>
             </div>
           </div>
         </div>
 
+        {/* Article + Sidebar */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Article */}
+          {/* Article */}
           <article className="lg:col-span-2 bg-white rounded-xl p-8 shadow-sm space-y-6">
             {contentBlocks.map((block, i) => {
               if (block.type === 'heading')
@@ -105,7 +137,7 @@ export default async function PostPage({ params }: Params) {
                 return (
                   <div key={i} className="my-6">
                     <Image
-                      src={block.src!}
+                      src={block.src}
                       alt={block.alt || ''}
                       width={800}
                       height={500}
@@ -139,7 +171,7 @@ export default async function PostPage({ params }: Params) {
           </aside>
         </div>
 
-        {/* Related Posts */}
+        {/* Related posts */}
         <section>
           <h2 className="text-2xl font-bold mb-6">مطالب مرتبط</h2>
           <div className="grid md:grid-cols-3 gap-6">
