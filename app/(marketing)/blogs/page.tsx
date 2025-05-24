@@ -45,23 +45,16 @@ export async function generateMetadata() {
 }
 
 // صفحهٔ اصلی داینامیک با query string
-export default async function BlogArchive({
-  searchParams,
-}: {
-  searchParams: { page?: string }
-}) {
+export default async function BlogArchive({ searchParams }: any) {
   const blog = await getBlogData()
   const per = blog.postsPerPage
   const all = blog.posts
   const totalPages = Math.ceil(all.length / per)
 
-  // عدد صفحه را از query بخوانیم (مثلاً ?page=2)
-  const page = Math.max(1, Number(searchParams.page ?? 1))
+  const page = Math.max(1, Number(searchParams?.page ?? 1))
 
-  // اگر بیرون از محدوده بود → 404
   if (page > totalPages && totalPages > 0) notFound()
 
-  // محاسبهٔ ایندکس‌ها
   const start = (page - 1) * per
   const posts = all.slice(start, start + per)
 
@@ -91,7 +84,7 @@ export default async function BlogArchive({
                   className="object-cover"
                 />
               </div>
-           
+
               <div className="p-6">
                 <Badge variant="outline" className="mb-3 bg-blue-400/30">
                   {post.category}
@@ -102,7 +95,7 @@ export default async function BlogArchive({
                 <p className="text-gray-600 mb-4 text-sm line-clamp-2">
                   {post.excerpt}
                 </p>
-              
+
                 <div className="flex items-center gap-2 grow">
                   {post.author.avatar ? (
                     <Image
@@ -117,7 +110,7 @@ export default async function BlogArchive({
                       <span className="text-xs text-white">?</span>
                     </div>
                   )}
-                  
+
                   <div className="text-xs text-gray-500">
                     <p className="font-medium text-emerald-600">
                       {post.author.name}
