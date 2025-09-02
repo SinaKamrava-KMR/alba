@@ -2,7 +2,8 @@
   "app": "alba",
   "port": 3000,
   "build": {
-    "location": "iran"
+    "location": "iran",
+    "nodeVersion": "20"
   },
   "disks": []
 }
