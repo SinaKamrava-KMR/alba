@@ -1,9 +1,8 @@
 {
-  
+  "app": "alba",
   "port": 3000,
   "build": {
     "location": "iran"
   },
-  "team-id": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOiI2ODJmMjFjMDI2M2E3ZjBhMWEwYzc2NWYiLCJ0eXBlIjoiYXV0aCIsImlhdCI6MTc0ODA2Mzk1OH0.fx9jRpaeZ9WUGGBL-EhyWlviPD08EQTVZDj9rypzEvY",
   "disks": []
 }
