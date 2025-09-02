@@ -6,7 +6,7 @@
     "env": {
       "NODE_VERSION": "20",
       "NPM_VERSION": "10",
-      "BUILD_NPM_CMD": "npm install"
+      "BUILD_NPM_CMD": "npm ci"
     }
   },
   "disks": []
