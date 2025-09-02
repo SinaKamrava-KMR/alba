@@ -3,11 +3,9 @@
   "port": 3000,
   "build": {
     "location": "iran",
-    "env": {
-      "NODE_VERSION": "20",
-      "NPM_VERSION": "10",
-      "BUILD_NPM_CMD": "npm ci"
-    }
+    "runtime": "node=20",
+    "npm": "10",
+    "cmd": "npm install"
   },
   "disks": []
 }
