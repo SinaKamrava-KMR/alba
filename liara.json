@@ -1,10 +1,12 @@
 {
   "app": "alba",
   "port": 3000,
+  "env": {
+    "NODE_VERSION": "20",
+    "NPM_VERSION": "10"
+  },
   "build": {
     "location": "iran",
-    "node": "20",
-    "npm": "10",
     "cmd": "npm install"
   },
   "disks": []
