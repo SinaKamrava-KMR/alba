@@ -4,5 +4,9 @@
   "build": {
     "location": "iran"
   },
+  "env": {
+    "NODE_VERSION": "20",
+    "BUILD_NPM_CMD": "npm install"
+  },
   "disks": []
 }
