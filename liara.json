@@ -3,7 +3,7 @@
   "port": 3000,
   "build": {
     "location": "iran",
-    "runtime": "node=20",
+    "node": "20",
     "npm": "10",
     "cmd": "npm install"
   },
